@@ -8,6 +8,7 @@
 #include "plugin.h"
 #include "rom.h"
 #include "savestates.h"
+#include "../gzm/gzm.h"
 #include "../memory/memory.h"
 
 #include <errno.h>
@@ -95,7 +96,7 @@ static const char *m_taskName[] =
 static char   m_filename[PATH_MAX];
 static char   AVIFileName[PATH_MAX];
 static FILE*  m_file = 0;
-static int    m_task = Idle;
+       int    m_task = Idle;
 
 static SMovieHeader m_header;
 static BOOL m_readOnly = FALSE;
@@ -933,6 +934,7 @@ VCR_getKeys( int Control, BUTTONS *Keys )
 		if(m_currentSample >= m_header.length_samples
 		|| m_currentVI >= m_header.length_vis)
 		{
+        getKeys( Control, Keys );
 //			if (m_capture != 0)
 //				VCR_stopCapture();
 //			else
@@ -952,6 +954,18 @@ VCR_getKeys( int Control, BUTTONS *Keys )
 	
 	//		fread( Keys, 1, sizeof (BUTTONS), m_file );
 			m_currentSample++;
+
+      if (Keys->Value == 0xC000)
+      {
+        extern int recording;
+        extern BOOL clear_sram_on_restart_mode;
+        extern BOOL continue_vcr_on_restart_mode;
+        /* w.[0x01ED86E0] = recording; */
+        clear_sram_on_restart_mode = FALSE;
+        continue_vcr_on_restart_mode = TRUE;
+        recording = FALSE;
+        resetEmu();
+      }
 		}
 		else
 		{
@@ -1398,6 +1412,8 @@ VCR_startPlayback( const char *filename, const char *authorUTF8, const char *des
 int
 VCR_stopPlayback()
 {
+	gzm_stop();
+
 	if(m_inputBuffer)
 	{
 		free(m_inputBuffer);
@@ -1815,8 +1831,10 @@ void
 VCR_coreStopped()
 {
     extern BOOL continue_vcr_on_restart_mode;
-    if(continue_vcr_on_restart_mode)
+    if(continue_vcr_on_restart_mode) {
+      gzm_record_reset();
 	    return;
+    }
 	    
 	switch (m_task)
 	{

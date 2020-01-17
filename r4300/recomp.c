@@ -33,6 +33,7 @@
 #include "macros.h"
 #include "r4300.h"
 #include "ops.h"
+#include "../gzm/gzm.h"
 #include "../memory/memory.h"
 #include "recomph.h"
 
@@ -2337,6 +2338,7 @@ void recompile_block(long *source, precomp_block *block, unsigned long func)
 #ifdef EMU64_DEBUG
 	if (dynacore) gendebug();
 #endif
+  if (dynacore) gzm_hook(dst);
 	recomp_ops[((src >> 26) & 0x3F)]();
 	dst = block->block + i;
 	/*if ((dst+1)->ops != NOTCOMPILED && !delay_slot_compiled &&
@@ -2490,6 +2492,7 @@ void recompile_opcode()
    dst++;
    dst->addr = (dst-1)->addr + 4;
    dst->reg_cache_infos.need_map = 0;
+   if (dynacore) gzm_hook(dst);
    if(!is_jump())
      recomp_ops[((src >> 26) & 0x3F)]();
    else
@@ -2504,5 +2507,6 @@ void prefetch_opcode(unsigned long op)
 {
    dst = PC;
    src = op;
+   if (dynacore) gzm_hook(dst);
    recomp_ops[((src >> 26) & 0x3F)]();
 }

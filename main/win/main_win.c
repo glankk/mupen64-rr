@@ -1230,6 +1230,7 @@ static DWORD WINAPI closeRom(LPVOID lpParam)
       
       
       ShowInfo("Closing emulation thread...");
+      Sleep(10); /* EZ */
       stop_it();
       
       WaitEmuThread();

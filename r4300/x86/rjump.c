@@ -48,7 +48,7 @@ void dyna_jump()
        : "memory");*/
 }
 
-static int save_ebp;
+int save_ebp;
 
 void dyna_start(void (*code)())
 {

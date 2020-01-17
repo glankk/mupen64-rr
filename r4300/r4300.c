@@ -31,6 +31,7 @@
 #include "../main/vcr.h"
 #include "r4300.h"
 #include "ops.h"
+#include "../gzm/gzm.h"
 #include "../memory/memory.h"
 #include "exception.h"
 #include "interupt.h"
@@ -44,6 +45,9 @@ extern int debugger_mode;
 extern void update_debugger();
 #endif
 
+#ifdef OOT_PAUSE_HACK
+unsigned long vi_count;
+#endif
 unsigned long i, dynacore = 0, interpcore = 0;
 int no_audio_delay = 0;
 int no_compiled_jump = 0;
@@ -1400,7 +1404,7 @@ static inline unsigned long update_invalid_addr(unsigned long addr)
 
 #define addr jump_to_address
 unsigned long jump_to_address;
-inline void jump_to_func()
+void jump_to_func()
 {
    unsigned long paddr;
    if (skip_jump) return;
@@ -1491,11 +1495,30 @@ void init_blocks()
 
 void go()
 {
+   {
+     enum ETask
+     {
+       Idle = 0,
+       StartRecording,
+       StartRecordingFromSnapshot,
+       Recording,
+       StartPlayback,
+       StartPlaybackFromSnapshot,
+       Playback
+     };
+     extern int m_task;
+     if (m_task == StartPlayback)
+       gzm_start();
+   }
+
    long long CRC = 0;
    unsigned int j;
    
    j=0;
    debug_count = 0;
+#ifdef OOT_PAUSE_HACK
+   vi_count = 0;
+#endif
    printf("demarrage r4300\n");
    memcpy((char *)SP_DMEM+0x40, rom+0x40, 0xFBC);
    delay_slot=0;

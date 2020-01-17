@@ -378,6 +378,14 @@ void gen_interupt()
 	break;
 	
       case VI_INT:
+#ifdef OOT_PAUSE_HACK
+  {
+    extern unsigned char *rdramb;
+    extern unsigned int vi_count;
+    if (++vi_count > 0x3C)
+      *(unsigned short*)(rdramb + 0x001DA5C8) = 0x0002;
+  }
+#endif
 #ifdef VCR_SUPPORT
 	VCR_updateScreen();
 #else

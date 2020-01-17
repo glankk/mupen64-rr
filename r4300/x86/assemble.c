@@ -99,7 +99,7 @@ void passe2(precomp_instr *dest, int start, int end, precomp_block *block)
    code_length = real_code_length;
 }
 
-inline void put8(unsigned char octet)
+void put8(unsigned char octet)
 {
    (*inst_pointer)[code_length] = octet;
    code_length++;
@@ -110,7 +110,7 @@ inline void put8(unsigned char octet)
      }
 }
 
-inline void put32(unsigned long dword)
+void put32(unsigned long dword)
 {
    if ((code_length+4) >= max_code_length)
      {
@@ -121,7 +121,7 @@ inline void put32(unsigned long dword)
    code_length+=4;
 }
 
-inline void put16(unsigned short word)
+void put16(unsigned short word)
 {
    if ((code_length+2) >= max_code_length)
      {
